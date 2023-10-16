@@ -1,0 +1,3 @@
+{
+    "depencies": ["pandas", "numpy", "xlsxwriter"]
+}
