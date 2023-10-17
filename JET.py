@@ -1,5 +1,8 @@
 import importlib
 import json
+import os
+
+from helpers import helper_funcs
 
 # data preparation and sanitization should be handled outside the class
 # since the quality and the completeness of the dataset is unknown
@@ -38,6 +41,8 @@ class JETester:
         """
         self.path = path
         self.df = None
+        self.config = {}
+        self.is_dev = True
         self._load()
 
     def __version__(self):
@@ -60,14 +65,18 @@ class JETester:
         -------
         None
         """
-        if isinstance(self.config["dependencies"], list):
-            for dependency in self.config["dependencies"]:
-                try:
-                    importlib.import_module(dependency)
-                except ImportError:
-                    raise ImportError(f"Dependency {dependency} not installed")
-        else:
-            raise TypeError("Dependencies must be a list")
+
+        try:
+            if isinstance(self.config["dependencies"], list):
+                for dependency in self.config["dependencies"]:
+                    try:
+                        importlib.import_module(dependency)
+                    except ImportError:
+                        raise ImportError(f"Dependency {dependency} not installed")
+            else:
+                raise TypeError("Dependencies must be a list")
+        except Exception as e:
+            helper_funcs.exception_handler(self.is_dev, "dependencies", "list", e)
 
     def _load(self):
         self._load_config()
@@ -141,7 +150,7 @@ class JETester:
 
 
 if __name__ == "__main__":
-    t = JETester("./tests/test_data")
+    t = JETester(os.getcwd() + "/tests/test_data")
     print(t)
     print(t.config)
     print(t.data)
