@@ -2,7 +2,7 @@ import importlib
 import json
 import os
 
-from helpers import helper_funcs
+from helpers.helper_funcs import exception_handler
 
 # data preparation and sanitization should be handled outside the class
 # since the quality and the completeness of the dataset is unknown
@@ -76,14 +76,29 @@ class JETester:
             else:
                 raise TypeError("Dependencies must be a list")
         except Exception as e:
-            helper_funcs.exception_handler(self.is_dev, "dependencies", "list", e)
+            exception_handler(self.is_dev, e, e, e)
 
-    def _load(self):
+    def _load(self) -> None:
         self._load_config()
         self._load_data()
         self._check_dependencies()
 
-    def _load_config(self):
+    def _load_config(self) -> None:
+        """
+        Loads the configuration of the journal entry test
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        FileNotFoundError
+            If the config.json file is not found
+
+        JSONDecodeError
+            If the config.json file is not a valid JSON file
+        """
         self.config = {}
         with open(self.path + "/config.json") as f:
             self.config = json.load(f)
@@ -141,18 +156,22 @@ class JETester:
         -------
         None
         """
-        if type == "csv":
-            return dataframe.to_csv(f"{self.path}/data.csv")
-        elif type == "excel":
-            return dataframe.to_excel(f"{self.path}/data.xlsx", engine="xlsxwriter")
-        else:
-            raise ValueError("type must be either 'csv' or 'excel'")
+
+        try:
+            if type == "csv":
+                return dataframe.to_csv(f"{self.path}/data.csv")
+            elif type == "excel":
+                return dataframe.to_excel(f"{self.path}/data.xlsx", engine="xlsxwriter")
+            else:
+                raise ValueError("type must be either 'csv' or 'excel'")
+
+        except Exception as e:
+            exception_handler(self.is_dev, e, e, e)
 
 
 if __name__ == "__main__":
-    t = JETester(os.getcwd() + "/tests/test_data")
-    print(t)
-    print(t.config)
-    print(t.data)
-    print(t._get_path())
+    t = JETester(os.path.join(os.getcwd(), "tests/test_data"))
+    print("config", t.config)
+    print("data", t.data)
+    print("path", t._get_path())
     print(t.__print__())
