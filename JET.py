@@ -1,8 +1,13 @@
+#!/usr/bin/env python
+
 import importlib
 import json
 import os
+import sys
+import pandas as pd
 
 from helpers.helper_funcs import exception_handler
+
 
 # data preparation and sanitization should be handled outside the class
 # since the quality and the completeness of the dataset is unknown
@@ -16,10 +21,6 @@ class JETester:
     ----------
     path : str
         The path to the journal entry test
-    config : dict
-        The configuration of the journal entry test
-    data : dict
-        The data of the journal entry test
 
     Methods
     -------
@@ -42,7 +43,6 @@ class JETester:
         self.path = path
         self.df = None
         self.config = {}
-        self.is_dev = True
         self._load()
 
     def __version__(self):
@@ -65,8 +65,7 @@ class JETester:
         -------
         None
         """
-
-        try:
+        if "dependencies" in self.config:
             if isinstance(self.config["dependencies"], list):
                 for dependency in self.config["dependencies"]:
                     try:
@@ -75,8 +74,6 @@ class JETester:
                         raise ImportError(f"Dependency {dependency} not installed")
             else:
                 raise TypeError("Dependencies must be a list")
-        except Exception as e:
-            exception_handler(self.is_dev, e, e, e)
 
     def _load(self) -> None:
         self._load_config()
@@ -99,21 +96,25 @@ class JETester:
         JSONDecodeError
             If the config.json file is not a valid JSON file
         """
-        self.config = {}
-        with open(self.path + "/config.json") as f:
-            self.config = json.load(f)
+        try:
+            with open(self.path + "config.json") as f:
+                self.config = json.load(f)
+        except FileNotFoundError:
+            raise FileNotFoundError(
+                "config.json not found at: " + self.path + "config.json"
+            )
 
     def _load_data(self):
         self.data = {}
-        with open(self.path + "/data.json") as f:
+        with open(self.path + "data.json") as f:
             self.data = json.load(f)
 
     def _save_config(self):
-        with open(self.path + "/config.json", "w") as f:
+        with open(self.path + "config.json", "w") as f:
             json.dump(self.config, f)
 
     def _save_data(self):
-        with open(self.path + "/data.json", "w") as f:
+        with open(self.path + "data.json", "w") as f:
             json.dump(self.data, f)
 
     def _save(self):
@@ -135,10 +136,10 @@ class JETester:
         self._save_config()
 
     def _get_data_path(self):
-        return self.path + "/data.json"
+        return self.path + "data.json"
 
     def _get_config_path(self):
-        return self.path + "/config.json"
+        return self.path + "config.json"
 
     def _get_path(self):
         return self.path
@@ -156,21 +157,22 @@ class JETester:
         -------
         None
         """
-
-        try:
+        if isinstance(dataframe, pd.DataFrame):
             if type == "csv":
-                return dataframe.to_csv(f"{self.path}/data.csv")
+                return dataframe.to_csv(f"{self.path}\\data.csv")
             elif type == "excel":
-                return dataframe.to_excel(f"{self.path}/data.xlsx", engine="xlsxwriter")
+                return dataframe.to_excel(
+                    f"{self.path}\\data.xlsx", engine="xlsxwriter"
+                )
             else:
                 raise ValueError("type must be either 'csv' or 'excel'")
-
-        except Exception as e:
-            exception_handler(self.is_dev, e, e, e)
+        else:
+            raise TypeError("dataframe must be a pandas dataframe")
 
 
 if __name__ == "__main__":
-    t = JETester(os.path.join(os.getcwd(), "tests/test_data"))
+    sys.excepthook = exception_handler
+    t = JETester(os.path.join(os.getcwd(), "tests\\test_data\\"))
     print("config", t.config)
     print("data", t.data)
     print("path", t._get_path())

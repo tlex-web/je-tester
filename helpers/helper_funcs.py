@@ -1,14 +1,33 @@
+import logging
+from types import TracebackType
+from typing import Type
 import sys
 
 
 def exception_handler(
-    debug: bool,
-    exception_type: Exception,
-    exception: Exception,
-    traceback: Exception,
-    debug_hook=sys.__excepthook__,
+    exception_type: Type[BaseException],
+    exception: BaseException,
+    traceback: TracebackType | None,
 ):
-    if debug:
-        debug_hook(exception_type, exception, traceback.__traceback__)
-    else:
-        print("%s: %s" % (exception_type, exception))
+    """
+    A function to handle exceptions
+
+    Parameters
+    ----------
+    exception_type : Exception
+        The type of exception
+    exception : Exception
+        The exception
+    traceback : Exception
+        The traceback of the exception
+
+    Returns
+    -------
+    None
+    """
+
+    logging.error(
+        f"\nException type: {exception_type.__name__} \nException: {exception} \nTraceback: {traceback}"
+    )
+
+    sys.__excepthook__(exception_type, exception, traceback)
