@@ -17,6 +17,35 @@ def test_get_config(jet):
     assert isinstance(jet.config, dict)
 
 
+def test_config_not_found(jet):
+    jet.path = "invalid_path"
+    with pytest.raises(FileNotFoundError):
+        jet._load_config()
+
+
+def test_data_not_found(jet):
+    jet.path = "invalid_path"
+    with pytest.raises(FileNotFoundError):
+        jet._load_data()
+
+
+def test_config_not_list(jet):
+    jet.config = {"dependencies": "not a list"}
+    with pytest.raises(TypeError):
+        jet._check_dependencies()
+
+
+def test_config_list(jet):
+    jet.config = {"dependencies": ["os"]}
+    jet._check_dependencies()
+
+
+def test_dependencies_not_installed(jet):
+    jet.config = {"dependencies": ["not_installed"]}
+    with pytest.raises(ImportError):
+        jet._check_dependencies()
+
+
 def test_export_csv(jet, data_path):
     df = pd.DataFrame({"col1": [1, 2], "col2": [3, 4]})
     jet.export_df(df, type="csv")
