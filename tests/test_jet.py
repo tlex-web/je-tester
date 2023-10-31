@@ -13,6 +13,10 @@ def test_get_path(jet, data_path):
     assert jet._get_path() == data_path
 
 
+def test_set_path(jet, data_path):
+    pass
+
+
 def test_get_config(jet):
     assert isinstance(jet.config, dict)
 
@@ -65,7 +69,7 @@ def test_export_invalid_type(jet):
 
 
 def test_invalid_export(jet):
-    # create invalid dataframe
+    # create dict instead of df
     df = {"col1": [1, 2], "col2": [3, 4]}
 
     with pytest.raises(Exception):

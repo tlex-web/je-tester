@@ -1,7 +1,7 @@
 import pytest
 import os
 
-from JET import JETester
+from modules.JET import JETester
 
 
 @pytest.fixture

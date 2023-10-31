@@ -1,10 +1,7 @@
 import importlib
 import json
 import os
-import sys
 import pandas as pd
-
-from helpers.helper_funcs import exception_handler
 
 
 # data preparation and sanitization should be handled outside the class
@@ -22,8 +19,6 @@ class JETester:
 
     Methods
     -------
-    __version__()
-        Returns the version of the journal entry test
     """
 
     def __init__(self, path: str):
@@ -38,7 +33,7 @@ class JETester:
         -------
         None
         """
-        self.path = path
+        self.path = path if os.path.exists(path) else os.mkdir(path) or path
         self.df = None
         self.config = {}
         self._load()
@@ -166,12 +161,3 @@ class JETester:
                 raise ValueError("type must be either 'csv' or 'excel'")
         else:
             raise TypeError("dataframe must be a pandas dataframe")
-
-
-if __name__ == "__main__":
-    sys.excepthook = exception_handler
-    t = JETester(os.path.join(os.getcwd(), "tests\\test_data\\"))
-    print("config", t.config)
-    print("data", t.data)
-    print("path", t._get_path())
-    print(t.__print__())
