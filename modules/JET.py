@@ -3,6 +3,8 @@ import json
 import os
 import pandas as pd
 
+from reports.reports import Report, Reports, ReporterPlotly, ReporterMatplotlib
+
 
 # data preparation and sanitization should be handled outside the class
 # since the quality and the completeness of the dataset is unknown

@@ -1,3 +1,6 @@
+from abc import ABC, abstractmethod
+from typing import Type, TypeVar, Union
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -5,18 +8,27 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 
-class Reports:
-    def __init__(self, df, reporter) -> None:
-        self.df = df
-        self.reporter = reporter
+class Report(ABC):
+    """Report class interface"""
 
-        super(self.reporter)
+    @abstractmethod
+    def plot_bar(self):
+        """plot bar method"""
 
-    def _get_reporter(self):
-        return self.reporter(self.df)
+    @abstractmethod
+    def plot_line(self):
+        """plot line method"""
+
+    @abstractmethod
+    def plot_scatter(self):
+        """plot scatter method"""
+
+    @abstractmethod
+    def plot_histogram(self):
+        """plot histogram method"""
 
 
-class ReporterPlotly:
+class ReporterPlotly(Report):
     """
     reporter class using plotly
 
@@ -90,7 +102,7 @@ class ReporterPlotly:
         fig.show()
 
 
-class ReporterMatplotlib:
+class ReporterMatplotlib(Report):
     """
     reporter class using matplotlib
 
@@ -153,3 +165,22 @@ class ReporterMatplotlib:
         plt.bar(group1, group2, color=color)
         plt.title(title)
         plt.show()
+
+
+class Reports:
+    """
+    Reports class
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        the dataframe to use
+
+    Returns
+    -------
+    None
+    """
+
+    def __init__(self, df, reporter) -> None:
+        self.df = df
+        self.reporter = reporter
