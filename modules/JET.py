@@ -1,9 +1,10 @@
 import importlib
 import json
 import os
+from numpy import tile
 import pandas as pd
 
-from reports.reports import Report, Reports, ReporterPlotly, ReporterMatplotlib
+from reports.reports import Report, ReportContext
 
 
 # data preparation and sanitization should be handled outside the class
@@ -23,7 +24,7 @@ class JETester:
     -------
     """
 
-    def __init__(self, path: str):
+    def __init__(self, path: str, reporter: Report):
         """
         Parameters
         ----------
@@ -37,6 +38,7 @@ class JETester:
         """
         self.path = path if os.path.exists(path) else os.mkdir(path) or path
         self.df = None
+        self.reporter = reporter
         self.config = {}
         self._load()
 
@@ -139,6 +141,9 @@ class JETester:
     def _get_path(self):
         return self.path
 
+    def _get_df(self):
+        return self.df if self.df is not None else pd.DataFrame(self.data)
+
     def export_df(self, dataframe, type="csv") -> None:
         """
         Exports the dataframe to a csv or excel file
@@ -163,3 +168,11 @@ class JETester:
                 raise ValueError("type must be either 'csv' or 'excel'")
         else:
             raise TypeError("dataframe must be a pandas dataframe")
+
+    def create_scatter_plot(self, title, color) -> None:
+        df = self._get_df()
+
+        context = ReportContext(
+            title=title, color=color, x=df.columns[0], y=df.columns[1]
+        )
+        self.reporter.plot_scatter(df, context)

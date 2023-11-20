@@ -8,73 +8,78 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 
+class ReportContext:
+    """Report context class to encapsulate report parameters"""
+
+    def __init__(self, title: str, color: str, x, y) -> None:
+        self.title = title
+        self.color = color
+        self.x = x
+        self.y = y
+
+
 class Report(ABC):
     """Report class interface"""
 
     @abstractmethod
-    def plot_bar(self):
+    def plot_bar(self, dataframe, options: ReportContext):
         """plot bar method"""
 
     @abstractmethod
-    def plot_line(self):
+    def plot_line(self, dataframe, options: ReportContext):
         """plot line method"""
 
     @abstractmethod
-    def plot_scatter(self):
+    def plot_scatter(self, dataframe, options: ReportContext):
         """plot scatter method"""
 
     @abstractmethod
-    def plot_histogram(self):
+    def plot_histogram(self, dataframe, options: ReportContext):
         """plot histogram method"""
 
 
+# create a concrete class for each type of report
 class ReporterPlotly(Report):
     """
     reporter class using plotly
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        the dataframe to use
 
     Returns
     -------
     None
     """
 
-    def __init__(self, df: pd.DataFrame) -> None:
-        self.df = df
-
-    def plot_bar(self, x, y, title=""):
-        fig = px.bar(self.df, x=x, y=y, title=title)
+    def plot_bar(self, df, options: ReportContext):
+        fig = px.bar(
+            df, x=options.x, y=options.y, color=options.color, title=options.title
+        )
         fig.show()
 
-    def plot_line(self, x, y, title=""):
-        fig = px.line(self.df, x=x, y=y, title=title)
+    def plot_line(self, df, x, y, title=""):
+        fig = px.line(df, x=x, y=y, title=title)
         fig.show()
 
-    def plot_scatter(self, x, y, title=""):
-        fig = px.scatter(self.df, x=x, y=y, title=title)
+    def plot_scatter(self, df, x, y, title=""):
+        fig = px.scatter(df, x=x, y=y, title=title)
         fig.show()
 
-    def plot_pie(self, names, values, title=""):
-        fig = px.pie(self.df, names=names, values=values, title=title)
+    def plot_pie(self, df, names, values, title=""):
+        fig = px.pie(df, names=names, values=values, title=title)
         fig.show()
 
-    def plot_box(self, x, y, title=""):
-        fig = px.box(self.df, x=x, y=y, title=title)
+    def plot_box(self, df, x, y, title=""):
+        fig = px.box(df, x=x, y=y, title=title)
         fig.show()
 
-    def plot_histogram(self, x, title=""):
-        fig = px.histogram(self.df, x=x, title=title)
+    def plot_histogram(self, df, x, title=""):
+        fig = px.histogram(df, x=x, title=title)
         fig.show()
 
-    def plot_heatmap(self, x, y, z, title=""):
-        fig = px.density_heatmap(self.df, x=x, y=y, z=z, title=title)
+    def plot_heatmap(self, df, x, y, z, title=""):
+        fig = px.density_heatmap(df, x=x, y=y, z=z, title=title)
         fig.show()
 
-    def plot_3d(self, x, y, z, title=""):
-        fig = px.scatter_3d(self.df, x=x, y=y, z=z, title=title)
+    def plot_3d(self, df, x, y, z, title=""):
+        fig = px.scatter_3d(df, x=x, y=y, z=z, title=title)
         fig.show()
 
     def plot_surface(self, x, y, z, title=""):
@@ -89,15 +94,13 @@ class ReporterPlotly(Report):
         )
         fig.show()
 
-    def plot_grouped_bar(self, group1, group2, color, title=""):
-        fig = px.bar(
-            self.df, x=group1, y=group2, color=color, title=title, barmode="group"
-        )
+    def plot_grouped_bar(self, df, group1, group2, color, title=""):
+        fig = px.bar(df, x=group1, y=group2, color=color, title=title, barmode="group")
         fig.show()
 
-    def plot_grouped_line(self, group1, group2, color, title=""):
+    def plot_grouped_line(self, df, group1, group2, color, title=""):
         fig = px.line(
-            self.df, x=group1, y=group2, color=color, title=title, line_group=color
+            df, x=group1, y=group2, color=color, title=title, line_group=color
         )
         fig.show()
 
@@ -115,9 +118,6 @@ class ReporterMatplotlib(Report):
     -------
     None
     """
-
-    def __init__(self, df: pd.DataFrame) -> None:
-        self.df = df
 
     def plot_bar(self, x, y, title=""):
         plt.bar(x, y)
@@ -167,9 +167,9 @@ class ReporterMatplotlib(Report):
         plt.show()
 
 
-class Reports:
+class ReporterFactory:
     """
-    Reports class
+    reporter factory class
 
     Parameters
     ----------
@@ -181,6 +181,12 @@ class Reports:
     None
     """
 
-    def __init__(self, df, reporter) -> None:
-        self.df = df
-        self.reporter = reporter
+    def get_reporter(
+        self, reporter_type: str
+    ) -> Union[ReporterPlotly, ReporterMatplotlib]:
+        if reporter_type == "plotly":
+            return ReporterPlotly()
+        elif reporter_type == "matplotlib":
+            return ReporterMatplotlib()
+        else:
+            raise ValueError("Invalid reporter type")
