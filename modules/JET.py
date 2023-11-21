@@ -1,7 +1,6 @@
 import importlib
 import json
 import os
-from numpy import tile
 import pandas as pd
 
 from reports.reports import Report, ReportContext
@@ -169,10 +168,37 @@ class JETester:
         else:
             raise TypeError("dataframe must be a pandas dataframe")
 
-    def create_scatter_plot(self, title, color) -> None:
-        df = self._get_df()
+    def create_scatter_plot(self, df, x, y, title, color) -> None:
+        context = ReportContext(df, x, y, title, color)
 
-        context = ReportContext(
-            title=title, color=color, x=df.columns[0], y=df.columns[1]
-        )
         self.reporter.plot_scatter(df, context)
+
+    def create_histogram(self, df, x, y, title, color) -> None:
+        context = ReportContext(df, x, y, title, color)
+
+        self.reporter.plot_histogram(df, context)
+
+    def create_pie_chart(self, df, x, y, title, color) -> None:
+        context = ReportContext(df, x, y, title, color)
+
+        self.reporter.plot_pie(df, context)
+
+    def create_box_plot(self, df, x, y, title, color) -> None:
+        context = ReportContext(df, x, y, title, color)
+
+        self.reporter.plot_box(df, context)
+
+    def create_heatmap(self, df, x, y, title, color) -> None:
+        context = ReportContext(df, x, y, title, color)
+
+        self.reporter.plot_heatmap(df, context)
+
+    def create_3d_plot(self, df, x, y, title, color) -> None:
+        context = ReportContext(df, x, y, title, color)
+
+        self.reporter.plot_3d(df, context)
+
+    def create_grouped_bar_chart(self, df, x, y, title, color) -> None:
+        context = ReportContext(df, x, y, title, color)
+
+        self.reporter.plot_grouped_bar(df, context)

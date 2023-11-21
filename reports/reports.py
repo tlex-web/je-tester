@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Type, TypeVar, Union
+from typing import Type, TypeVar, Union, Optional
 
 import pandas as pd
 import numpy as np
@@ -11,9 +11,25 @@ import plotly.graph_objects as go
 class ReportContext:
     """Report context class to encapsulate report parameters"""
 
-    def __init__(self, title: str, color: str, x, y) -> None:
+    def __init__(
+        self,
+        title: str,
+        color: Union[str, list[str]],
+        x: Optional[Union[str, list[str], np.ndarray]] = None,
+        y: Optional[Union[str, list[str], np.ndarray]] = None,
+        barmode: Optional[str] = None,
+        symbol: Optional[str] = None,
+        values: Optional[Union[str, list[str], np.ndarray]] = None,
+        names: Optional[str] = None,
+        color_discrete_map: Optional[Union[dict[str, str], str]] = None,
+    ) -> None:
         self.title = title
         self.color = color
+        self.barmode = barmode
+        self.symbol = symbol
+        self.values = values
+        self.names = names
+        self.color_discrete_map = color_discrete_map
         self.x = x
         self.y = y
 
@@ -37,6 +53,26 @@ class Report(ABC):
     def plot_histogram(self, dataframe, options: ReportContext):
         """plot histogram method"""
 
+    @abstractmethod
+    def plot_pie(self, dataframe, options: ReportContext):
+        """plot pie method"""
+
+    @abstractmethod
+    def plot_box(self, dataframe, options: ReportContext):
+        """plot box method"""
+
+    @abstractmethod
+    def plot_heatmap(self, dataframe, options: ReportContext):
+        """plot heatmap method"""
+
+    @abstractmethod
+    def plot_3d(self, dataframe, options: ReportContext):
+        """plot 3d method"""
+
+    @abstractmethod
+    def plot_grouped_bar(self, dataframe, options: ReportContext):
+        """plot grouped bar method"""
+
 
 # create a concrete class for each type of report
 class ReporterPlotly(Report):
@@ -48,59 +84,95 @@ class ReporterPlotly(Report):
     None
     """
 
-    def plot_bar(self, df, options: ReportContext):
+    def plot_bar(self, dataframe, options: ReportContext):
         fig = px.bar(
-            df, x=options.x, y=options.y, color=options.color, title=options.title
+            dataframe,
+            x=options.x,
+            y=options.y,
+            color=options.color,
+            barmode=options.barmode if options.barmode else "group",
+            title=options.title,
         )
         fig.show()
 
-    def plot_line(self, df, x, y, title=""):
-        fig = px.line(df, x=x, y=y, title=title)
-        fig.show()
-
-    def plot_scatter(self, df, x, y, title=""):
-        fig = px.scatter(df, x=x, y=y, title=title)
-        fig.show()
-
-    def plot_pie(self, df, names, values, title=""):
-        fig = px.pie(df, names=names, values=values, title=title)
-        fig.show()
-
-    def plot_box(self, df, x, y, title=""):
-        fig = px.box(df, x=x, y=y, title=title)
-        fig.show()
-
-    def plot_histogram(self, df, x, title=""):
-        fig = px.histogram(df, x=x, title=title)
-        fig.show()
-
-    def plot_heatmap(self, df, x, y, z, title=""):
-        fig = px.density_heatmap(df, x=x, y=y, z=z, title=title)
-        fig.show()
-
-    def plot_3d(self, df, x, y, z, title=""):
-        fig = px.scatter_3d(df, x=x, y=y, z=z, title=title)
-        fig.show()
-
-    def plot_surface(self, x, y, z, title=""):
-        fig = go.Figure(
-            data=[
-                go.Surface(
-                    x=x,
-                    y=y,
-                    z=z,
-                )
-            ]
-        )
-        fig.show()
-
-    def plot_grouped_bar(self, df, group1, group2, color, title=""):
-        fig = px.bar(df, x=group1, y=group2, color=color, title=title, barmode="group")
-        fig.show()
-
-    def plot_grouped_line(self, df, group1, group2, color, title=""):
+    def plot_line(self, dataframe, options: ReportContext):
         fig = px.line(
-            df, x=group1, y=group2, color=color, title=title, line_group=color
+            dataframe,
+            x=options.x,
+            y=options.y,
+            color=options.color,
+            title=options.title,
+        )
+        fig.show()
+
+    def plot_scatter(self, dataframe, options: ReportContext):
+        fig = px.scatter(
+            dataframe,
+            x=options.x,
+            y=options.y,
+            color=options.color,
+            title=options.title,
+        )
+        fig.show()
+
+    def plot_histogram(self, dataframe, options: ReportContext):
+        fig = px.histogram(
+            dataframe,
+            x=options.x,
+            y=options.y,
+            color=options.color,
+            title=options.title,
+        )
+        fig.show()
+
+    def plot_pie(self, dataframe, options: ReportContext):
+        fig = px.pie(
+            dataframe,
+            names=options.names,
+            values=options.values,
+            color=options.color,
+            title=options.title,
+        )
+        fig.show()
+
+    def plot_box(self, dataframe, options: ReportContext):
+        fig = px.box(
+            dataframe,
+            x=options.x,
+            y=options.y,
+            color=options.color,
+            title=options.title,
+        )
+        fig.show()
+
+    def plot_heatmap(self, dataframe, options: ReportContext):
+        fig = px.imshow(
+            dataframe,
+            x=options.x,
+            y=options.y,
+            color_continuous_scale=options.color_discrete_map,
+            title=options.title,
+        )
+        fig.show()
+
+    def plot_3d(self, dataframe, options: ReportContext):
+        fig = px.scatter_3d(
+            dataframe,
+            x=options.x,
+            y=options.y,
+            color=options.color,
+            title=options.title,
+        )
+        fig.show()
+
+    def plot_grouped_bar(self, dataframe, options: ReportContext):
+        fig = px.bar(
+            dataframe,
+            x=options.x,
+            y=options.y,
+            color=options.color,
+            barmode=options.barmode if options.barmode else "group",
+            title=options.title,
         )
         fig.show()
 
@@ -109,62 +181,64 @@ class ReporterMatplotlib(Report):
     """
     reporter class using matplotlib
 
-    Parameters
-    ----------
-    df : pd.DataFrame
-        the dataframe to use
-
     Returns
     -------
     None
     """
 
-    def plot_bar(self, x, y, title=""):
-        plt.bar(x, y)
-        plt.title(title)
-        plt.show()
+    def plot_bar(self, dataframe, options: ReportContext):
+        fig, ax = plt.subplots()
+        ax.bar(dataframe[options.x], dataframe[options.y])
+        ax.set_title(options.title)
+        fig.show()
 
-    def plot_line(self, x, y, title=""):
-        plt.plot(x, y)
-        plt.title(title)
-        plt.show()
+    def plot_line(self, dataframe, options: ReportContext):
+        fig, ax = plt.subplots()
+        ax.plot(dataframe[options.x], dataframe[options.y])
+        ax.set_title(options.title)
+        fig.show()
 
-    def plot_scatter(self, x, y, title=""):
-        plt.scatter(x, y)
-        plt.title(title)
-        plt.show()
+    def plot_scatter(self, dataframe, options: ReportContext):
+        fig, ax = plt.subplots()
+        ax.scatter(dataframe[options.x], dataframe[options.y])
+        ax.set_title(options.title)
+        fig.show()
 
-    def plot_pie(self, names, values, title=""):
-        plt.pie(x=values, labels=names)
-        plt.title(title)
-        plt.show()
+    def plot_histogram(self, dataframe, options: ReportContext):
+        fig, ax = plt.subplots()
+        ax.hist(dataframe[options.x], dataframe[options.y])
+        ax.set_title(options.title)
+        fig.show()
 
-    def plot_box(self, x, y, title=""):
-        plt.boxplot(x, y)
-        plt.title(title)
-        plt.show()
+    def plot_pie(self, dataframe, options: ReportContext):
+        fig, ax = plt.subplots()
+        ax.pie(dataframe[options.x], dataframe[options.y])
+        ax.set_title(options.title)
+        fig.show()
 
-    def plot_histogram(self, x, title=""):
-        plt.hist(x)
-        plt.title(title)
-        plt.show()
+    def plot_box(self, dataframe, options: ReportContext):
+        fig, ax = plt.subplots()
+        ax.boxplot(dataframe[options.x], dataframe[options.y])
+        ax.set_title(options.title)
+        fig.show()
 
-    def plot_heatmap(self, x, y, z, title=""):
-        plt.imshow(z, cmap="hot", interpolation="nearest")
-        plt.title(title)
-        plt.show()
+    def plot_heatmap(self, dataframe, options: ReportContext):
+        fig, ax = plt.subplots()
+        ax.imshow(dataframe[options.x], dataframe[options.y])
+        ax.set_title(options.title)
+        fig.show()
 
-    def plot_3d(self, x, y, z, title=""):
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection="3d")
-        ax.scatter(x, y, z)
-        plt.title(title)
-        plt.show()
+    def plot_3d(self, dataframe, options: ReportContext):
+        fig, ax = plt.subplots()
+        ax.scatter3d(dataframe[options.x], dataframe[options.y])
+        ax.set_title(options.title)
+        fig.show()
 
-    def plot_grouped_bar(self, group1, group2, color, title=""):
-        plt.bar(group1, group2, color=color)
-        plt.title(title)
-        plt.show()
+    def plot_grouped_bar(self, dataframe, options: ReportContext):
+        fig, ax = plt.subplots()
+        ax.bar(dataframe[options.x], dataframe[options.y])
+        ax.set_title(options.title)
+        fig.show()
 
 
 class ReporterFactory:
