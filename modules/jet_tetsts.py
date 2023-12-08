@@ -2,6 +2,10 @@
 
 from abc import ABC, abstractmethod
 
+import pandas as pd
+
+from reports.reports import Report, ReportContext
+
 
 class ScenarioContext:
     def __init__(self, name, description):
@@ -27,15 +31,39 @@ class JournalEntryTests(ABC):
         pass
 
 
+class JBPreparation(JournalEntryTests):
+    def __init__(self, reporter: Report):
+        self.reporter = reporter
+
+    def prepare_data(self):
+        print("JBpreparation: prepare data")
+
+    def run_test_scenario(self):
+        print("JBpreparation: run test scenario")
+
+    def create_report(self, dataframe: pd.DataFrame, reporter: Report):
+        print("JBpreparation: create report")
+        reporter.plot_missing_values(dataframe)
+
+    def export_data(self):
+        print("JBpreparation: export data")
+
+
 class JB0(JournalEntryTests):
     def prepare_data(self):
         print("JB0: prepare data")
+
+    def print_test_scenario_context(self):
+        print(
+            f"JB0: Reconciliation of the control totals (total amount and line item count) of the Journal Entry Data file(s) provided by the engagement team during the import process and the data imported and used for journal entry analysis. For each Journal Entry Data file, the report also displays the effective and entry date ranges. This report also displays a reconciliation of the control totals (beginning and ending balances and line item count) provided during the import process for the Trial Balance Data file(s), when applicable, to the data imported and used for journal entry analysis."
+        )
 
     def run_test_scenario(self):
         print("JB0: run test scenario")
 
     def create_report(self):
-        print("JB0: create report")
+        print("JB0: report", end="\n")
+        print("")
 
     def export_data(self):
         print("JB0: export data")

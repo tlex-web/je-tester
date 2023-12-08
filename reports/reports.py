@@ -39,7 +39,7 @@ class Report(ABC):
     """Report class interface"""
 
     @abstractmethod
-    def plot_missing_values(self, dataframe: pd.DataFrame, options: ReportContext):
+    def plot_missing_values(self, dataframe: pd.DataFrame):
         """plot missing values method"""
 
     @abstractmethod
@@ -89,7 +89,7 @@ class ReporterPlotly(Report):
     None
     """
 
-    def plot_missing_values(self, dataframe, options: ReportContext):
+    def plot_missing_values(self, dataframe) -> None:
         """plot missing values
 
         Args:
@@ -323,7 +323,7 @@ class ReporterMatplotlib(Report):
     None
     """
 
-    def plot_missing_values(self, dataframe, options: ReportContext):
+    def plot_missing_values(self, dataframe) -> None:
         """plot missing values
 
         Args:
