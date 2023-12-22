@@ -7,8 +7,10 @@
 import pytest
 import os
 
+import pandas as pd
+
 from modules.JET import JETester
-from reports.reports import ReporterMatplotlib
+from reports.reports import ReporterFactory, ReportContext
 
 
 @pytest.fixture
@@ -25,5 +27,15 @@ def data_path(project_root) -> str:
 def jet(project_root):
     return JETester(
         str(project_root) + os.sep + "tests" + os.sep + "test_data" + os.sep,
-        ReporterMatplotlib(),
+        ReporterFactory().get_reporter("plotly"),
     )
+
+
+@pytest.fixture
+def dataframe():
+    return pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6]})
+
+
+@pytest.fixture
+def options():
+    return ReportContext(title="Test Report", color="blue", x="x", y="y")
