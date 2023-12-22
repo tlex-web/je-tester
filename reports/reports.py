@@ -43,10 +43,6 @@ class Report(ABC):
         """plot missing values method"""
 
     @abstractmethod
-    def plot_missing_values(self, dataframe: pd.DataFrame):
-        """plot missing values method"""
-
-    @abstractmethod
     def plot_bar(self, dataframe: pd.DataFrame, options: ReportContext):
         """plot bar method"""
 
